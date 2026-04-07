@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "rennf93",
+  "description": "Plugins by Renzo Franceschini",
+  "owner": {
+    "name": "Renzo Franceschini",
+    "email": "rennf93@users.noreply.github.com"
+  },
+  "plugins": [
+    {
+      "name": "agent-runway",
+      "description": "Ensures subagents understand project architecture, module boundaries, and conventions before writing code. Validates code placement after execution.",
+      "source": ".",
+      "category": "development"
+    }
+  ]
+}

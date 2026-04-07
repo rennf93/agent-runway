@@ -1,0 +1,49 @@
+modules:
+  routers/:
+    purpose: "FastAPI route definitions only — no helpers, no logic"
+    allowed:
+      - "route handlers"
+    forbidden:
+      - "helper functions"
+      - "business logic"
+      - "utility functions"
+  services/:
+    purpose: "Business logic and orchestration"
+    forbidden:
+      - "route definitions"
+  helpers/:
+    purpose: "Shared utility functions"
+    forbidden:
+      - "route definitions"
+      - "business logic"
+  models/:
+    purpose: "Pydantic data models"
+    forbidden:
+      - "business logic"
+      - "route handlers"
+      - "utility functions"
+  tests/:
+    purpose: "Test suite"
+    forbidden:
+      - "production code"
+
+conventions:
+  no_inline_comments:
+    enabled: true
+    enforcement: block
+  no_lint_suppressions:
+    enabled: true
+    enforcement: block
+  no_noqa:
+    enabled: true
+    enforcement: block
+  no_type_ignore:
+    enabled: true
+    enforcement: block
+  no_helpers_in_routers:
+    enabled: true
+    enforcement: block
+  custom:
+    - pattern: "print\\("
+      message: "Use logging instead of print()"
+      enforcement: block

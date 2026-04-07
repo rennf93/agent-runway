@@ -1,0 +1,21 @@
+{
+  "name": "agent-runway",
+  "version": "1.0.0",
+  "description": "Claude Code plugin: architectural context injection and convention validation for subagents",
+  "type": "module",
+  "author": "Renzo Franceschini <rennf93@users.noreply.github.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rennf93/claude-agent-runway.git"
+  },
+  "scripts": {
+    "test": "node --test tests/test-*.mjs"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

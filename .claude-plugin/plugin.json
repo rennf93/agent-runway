@@ -1,0 +1,12 @@
+{
+  "name": "agent-runway",
+  "version": "1.0.0",
+  "description": "Ensures subagents understand project architecture, module boundaries, and conventions before writing code. Validates code placement after execution.",
+  "author": {
+    "name": "Renzo Franceschini",
+    "email": "rennf93@users.noreply.github.com"
+  },
+  "repository": "https://github.com/rennf93/claude-agent-runway",
+  "license": "MIT",
+  "keywords": ["subagent", "architecture", "conventions", "validation", "guardrails"]
+}

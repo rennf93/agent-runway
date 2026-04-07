@@ -8,7 +8,10 @@ When Claude Code delegates work to subagents, those agents operate in complete i
 
 ## The Fix
 
-Agent Runway intercepts every subagent spawn and injects your project's architectural context directly into its prompt. No configuration needed. The subagent just knows.
+Agent Runway works in two layers:
+
+1. **Prevention**: Intercepts every subagent spawn and injects your project's architectural context into its prompt. The subagent knows your module boundaries before writing a single line.
+2. **Correction**: Validates every file write and tells the agent to fix violations. The agent self-corrects without human intervention.
 
 Install it, forget about it, and your subagents stop creating tech debt.
 
@@ -68,18 +71,27 @@ Agent Runway works out of the box. It auto-discovers your project structure by m
 
 No `.agent-runway.yml` needed unless you want explicit control.
 
-## Optional: Post-landing Validation
+## Self-correction
 
-Agent Runway also validates code **after** a subagent writes it. All rules are **enabled in warn mode by default** — violations are reported to Claude so it self-corrects on the next turn. The edit is never blocked unless you explicitly opt in.
+The pre-flight injection prevents most violations — subagents that know the architecture write code in the right place. But when something slips through, Agent Runway catches it and tells the agent to fix it.
 
-Two validators run after each Write/Edit:
+After every Write/Edit, two validators run:
 
-- **Convention validator**: Flags comments, lint suppressions, and custom patterns across 13 languages
-- **Placement validator**: Flags code written in the wrong module (helpers in routers, business logic in controllers)
+- **Convention validator**: Catches comments, lint suppressions, and custom patterns across 13 languages
+- **Placement validator**: Catches code written in the wrong module (helpers in routers, business logic in controllers)
 
-### Opting into block mode
+When a violation is found, the agent receives a directive like:
 
-Block mode rejects the edit entirely, forcing Claude to fix the issue and retry. Only use this when you're confident in the rule — false positives will cause friction.
+```
+[Agent Runway] You wrote code with convention violations in routers/users.py. Fix these before moving on:
+  - L6: # Helper function to format user data
+  - L19: Lint suppression (noqa): if "@" not in email:  # noqa: E712
+Edit routers/users.py to resolve these violations, then continue with your task.
+```
+
+This is injected as `additionalContext` — Claude treats it as an instruction, not a suggestion. The agent fixes the issue and continues. No human intervention needed.
+
+All rules are **enabled in warn mode by default**. The edit is never blocked — the agent self-corrects. Block mode (hard rejection of the edit) is available but disabled by default:
 
 ```yaml
 conventions:

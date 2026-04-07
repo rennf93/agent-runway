@@ -37,11 +37,6 @@ jobs:
             -x "node_modules/*" ".git/*" "tests/*" ".github/*" "*.zip"
 
       - name: Upload release artifact
-        uses: softprops/action-upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./agent-runway-${{ github.ref_name }}.zip
-          asset_name: agent-runway-${{ github.ref_name }}.zip
-          asset_content_type: application/zip
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" "agent-runway-${{ github.ref_name }}.zip" --clobber

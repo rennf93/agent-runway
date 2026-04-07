@@ -164,7 +164,7 @@ The cached architectural map is the central data structure. It's written once at
 ## File Structure
 
 ```
-claude-agent-runway/
+agent-runway/
   .claude-plugin/
     plugin.json               # Plugin manifest (name, version, author)
   hooks/

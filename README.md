@@ -35,14 +35,14 @@ Each rule is independently configurable as `warn` (Claude self-corrects) or `blo
 ### From GitHub (self-hosted marketplace)
 
 ```bash
-/plugin marketplace add rennf93/claude-agent-runway
+/plugin marketplace add rennf93/agent-runway
 /plugin install agent-runway@rennf93
 ```
 
 ### From a local directory (development)
 
 ```bash
-claude --plugin-dir /path/to/claude-agent-runway
+claude --plugin-dir /path/to/agent-runway
 ```
 
 ## Quick Start

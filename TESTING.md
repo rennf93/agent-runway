@@ -9,14 +9,14 @@
 ## 1. Install Dependencies
 
 ```bash
-cd /path/to/claude-agent-runway
+cd /path/to/agent-runway
 npm install
 ```
 
 ## 2. Validate Plugin Structure
 
 ```bash
-claude plugin validate /path/to/claude-agent-runway
+claude plugin validate /path/to/agent-runway
 ```
 
 This checks the `.claude-plugin/plugin.json` manifest is well-formed.
@@ -27,21 +27,21 @@ This checks the `.claude-plugin/plugin.json` manifest is well-formed.
 
 ```bash
 cd /path/to/your-project
-claude --plugin-dir /path/to/claude-agent-runway
+claude --plugin-dir /path/to/agent-runway
 ```
 
 ### Option B: With debug logging (see hook execution)
 
 ```bash
 cd /path/to/your-project
-claude --plugin-dir /path/to/claude-agent-runway -d "hooks"
+claude --plugin-dir /path/to/agent-runway -d "hooks"
 ```
 
 ### Option C: Debug to file (review later)
 
 ```bash
 cd /path/to/your-project
-claude --plugin-dir /path/to/claude-agent-runway --debug-file /tmp/runway-debug.log
+claude --plugin-dir /path/to/agent-runway --debug-file /tmp/runway-debug.log
 ```
 
 ## 4. Verify SessionStart Hook
@@ -57,7 +57,7 @@ If you don't see it, check the debug output for errors.
 ### Manual test (outside Claude):
 
 ```bash
-cd /path/to/claude-agent-runway
+cd /path/to/agent-runway
 echo '{"session_context":{"working_directory":"/path/to/your-project"}}' \
   | CLAUDE_PLUGIN_DATA=/tmp/agent-runway-test node scripts/scan-project.mjs
 ```
@@ -91,7 +91,7 @@ With debug logging enabled (`-d "hooks"`), you should see:
 ### Manual test (outside Claude):
 
 ```bash
-cd /path/to/claude-agent-runway
+cd /path/to/agent-runway
 echo '{"tool_input":{"prompt":"Refactor the middleware to reduce complexity","subagent_type":"general-purpose"}}' \
   | CLAUDE_PLUGIN_DATA=/tmp/agent-runway-test node scripts/inject-context.mjs
 ```
@@ -131,7 +131,7 @@ EOF
 Then run the validator:
 
 ```bash
-cd /path/to/claude-agent-runway
+cd /path/to/agent-runway
 echo '{"tool_input":{"file_path":"/tmp/test-violation.py"}}' \
   | CLAUDE_PLUGIN_DATA=/tmp/agent-runway-test node scripts/validate-conventions.mjs 2>&1
 echo "Exit code: $?"
@@ -168,7 +168,7 @@ EOF
 First, scan the test project:
 
 ```bash
-cd /path/to/claude-agent-runway
+cd /path/to/agent-runway
 echo '{"session_context":{"working_directory":"/tmp/test-project"}}' \
   | CLAUDE_PLUGIN_DATA=/tmp/agent-runway-placement node scripts/scan-project.mjs
 ```
@@ -238,7 +238,7 @@ EOF
 Then re-run the scanner and verify the config overrides are applied:
 
 ```bash
-cd /path/to/claude-agent-runway
+cd /path/to/agent-runway
 echo '{"session_context":{"working_directory":"/path/to/your-project"}}' \
   | CLAUDE_PLUGIN_DATA=/tmp/agent-runway-config node scripts/scan-project.mjs
 
@@ -269,7 +269,7 @@ This is the real test. In a Claude Code session with the plugin loaded:
 
 ```bash
 cd /path/to/your-project
-claude --plugin-dir /path/to/claude-agent-runway --debug-file /tmp/runway-e2e.log
+claude --plugin-dir /path/to/agent-runway --debug-file /tmp/runway-e2e.log
 ```
 
 Then inside the session, try these prompts:
@@ -318,11 +318,11 @@ Once testing passes, install permanently:
 
 ```bash
 # User-level (available in all projects)
-claude plugin install agent-runway --path /path/to/claude-agent-runway -s user
+claude plugin install agent-runway --path /path/to/agent-runway -s user
 
 # Or project-level (only for fastapi-guard)
 cd /path/to/your-project
-claude plugin install agent-runway --path /path/to/claude-agent-runway -s project
+claude plugin install agent-runway --path /path/to/agent-runway -s project
 ```
 
 ## Troubleshooting
@@ -331,25 +331,25 @@ claude plugin install agent-runway --path /path/to/claude-agent-runway -s projec
 
 ```bash
 # Check plugin is recognized
-claude plugin validate /path/to/claude-agent-runway
+claude plugin validate /path/to/agent-runway
 
 # Check debug output
-claude --plugin-dir /path/to/claude-agent-runway -d "hooks"
+claude --plugin-dir /path/to/agent-runway -d "hooks"
 ```
 
 ### Hooks not firing
 
 1. Verify hooks.json is valid JSON:
    ```bash
-   node -e "JSON.parse(require('fs').readFileSync('/path/to/claude-agent-runway/hooks/hooks.json','utf8'));console.log('Valid')"
+   node -e "JSON.parse(require('fs').readFileSync('/path/to/agent-runway/hooks/hooks.json','utf8'));console.log('Valid')"
    ```
 
 2. Check that scripts are executable and have no syntax errors:
    ```bash
-   node --check /path/to/claude-agent-runway/scripts/scan-project.mjs
-   node --check /path/to/claude-agent-runway/scripts/inject-context.mjs
-   node --check /path/to/claude-agent-runway/scripts/validate-conventions.mjs
-   node --check /path/to/claude-agent-runway/scripts/validate-placement.mjs
+   node --check /path/to/agent-runway/scripts/scan-project.mjs
+   node --check /path/to/agent-runway/scripts/inject-context.mjs
+   node --check /path/to/agent-runway/scripts/validate-conventions.mjs
+   node --check /path/to/agent-runway/scripts/validate-placement.mjs
    ```
 
 3. Check CLAUDE_PLUGIN_ROOT and CLAUDE_PLUGIN_DATA are set:
@@ -371,7 +371,7 @@ The `no_inline_comments` rule may flag legitimate shebangs or encoding declarati
 If the scanner fails silently (it exits 0 on errors to avoid blocking sessions):
 
 ```bash
-cd /path/to/claude-agent-runway
+cd /path/to/agent-runway
 echo '{"session_context":{"working_directory":"/your/project"}}' \
   | CLAUDE_PLUGIN_DATA=/tmp/test node scripts/scan-project.mjs 2>&1
 ```

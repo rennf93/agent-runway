@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  validate-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Validate version matches tag
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          TAG_VERSION="${TAG#v}"
+          PLUGIN_VERSION=$(node -e "console.log(require('./.claude-plugin/plugin.json').version)")
+          if [ "$TAG_VERSION" != "$PLUGIN_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match plugin.json version ($PLUGIN_VERSION)"
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm test
+
+      - name: Create release artifact
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          zip -r "agent-runway-${TAG}.zip" . \
+            -x "node_modules/*" ".git/*" "tests/*" ".github/*" "*.zip"
+
+      - name: Upload release artifact
+        uses: softprops/action-upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./agent-runway-${{ github.ref_name }}.zip
+          asset_name: agent-runway-${{ github.ref_name }}.zip
+          asset_content_type: application/zip

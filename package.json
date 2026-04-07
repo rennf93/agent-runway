@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rennf93/claude-agent-runway.git"
+    "url": "https://github.com/rennf93/agent-runway.git"
   },
   "scripts": {
     "test": "node --test tests/test-*.mjs"

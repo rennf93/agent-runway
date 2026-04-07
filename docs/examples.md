@@ -370,7 +370,7 @@ When working on the API service:
 
 ```bash
 cd monorepo/services/api
-claude --plugin-dir /path/to/claude-agent-runway
+claude --plugin-dir /path/to/agent-runway
 ```
 
 The scanner will use `services/api/` as root and find its `.agent-runway.yml`.

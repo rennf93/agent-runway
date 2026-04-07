@@ -3,8 +3,8 @@
 ## Setup
 
 ```bash
-git clone https://github.com/rennf93/claude-agent-runway.git
-cd claude-agent-runway
+git clone https://github.com/rennf93/agent-runway.git
+cd agent-runway
 npm install
 ```
 
@@ -71,7 +71,7 @@ echo '{"tool_input":{"file_path":"/path/to/file.py"}}' \
 
 ```bash
 cd /your/project
-claude --plugin-dir /path/to/claude-agent-runway -d "hooks"
+claude --plugin-dir /path/to/agent-runway -d "hooks"
 ```
 
 The `-d "hooks"` flag shows debug output for hook execution.

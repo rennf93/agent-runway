@@ -6,7 +6,7 @@
     "name": "Renzo Franceschini",
     "email": "rennf93@users.noreply.github.com"
   },
-  "repository": "https://github.com/rennf93/claude-agent-runway",
+  "repository": "https://github.com/rennf93/agent-runway",
   "license": "MIT",
   "keywords": ["subagent", "architecture", "conventions", "validation", "guardrails"]
 }

@@ -81,15 +81,21 @@ async function main() {
   if (violations.length === 0) process.exit(0);
 
   const enforcement = archMap.conventions?.no_helpers_in_routers?.enforcement || "warn";
-  const formatted = violations.map((v) => `  L${v.line}: ${v.content}`).join("\n");
-  const message = `[Agent Runway] Module boundary violations in ${filePath} (${moduleInfo.path}):\n${formatted}`;
 
   if (enforcement === "block") {
-    block(message);
+    const formatted = violations.map((v) => `  L${v.line}: ${v.content}`).join("\n");
+    block(`[Agent Runway] BLOCKING - Module boundary violations in ${filePath} (${moduleInfo.path}):\n${formatted}`);
   } else {
+    const parts = [
+      `[Agent Runway] You placed code in the wrong module (${filePath}, part of ${moduleInfo.path}: ${moduleInfo.purpose}). Fix these before moving on:`,
+    ];
+    for (const v of violations) {
+      parts.push(`  - L${v.line}: Move "${v.content.split('"')[1]}" to the appropriate module (services/, helpers/, etc.)`);
+    }
+    parts.push(`Edit or move the code to the correct module, then continue with your task.`);
     respond({
       hookEventName: "PostToolUse",
-      additionalContext: message,
+      additionalContext: parts.join("\n"),
     });
   }
 }

@@ -115,15 +115,31 @@ async function main() {
   }
 
   if (warningViolations.length > 0) {
-    const message = formatViolations(filePath, warningViolations, "WARNING");
+    const message = formatFixDirective(filePath, warningViolations);
     respond({
       hookEventName: "PostToolUse",
-      additionalContext: `[Agent Runway] Convention violations detected:\n${message}`,
+      additionalContext: message,
     });
     return;
   }
 
   process.exit(0);
+}
+
+function formatFixDirective(filePath, violations) {
+  const parts = [
+    `[Agent Runway] You wrote code with convention violations in ${filePath}. Fix these before moving on:`,
+  ];
+  for (const v of violations) {
+    for (const detail of v.details.slice(0, 5)) {
+      parts.push(`  - ${detail.trim()}`);
+    }
+    if (v.details.length > 5) {
+      parts.push(`  - ... and ${v.details.length - 5} more`);
+    }
+  }
+  parts.push(`Edit ${filePath} to resolve these violations, then continue with your task.`);
+  return parts.join("\n");
 }
 
 function formatViolations(filePath, violations, level) {

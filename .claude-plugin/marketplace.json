@@ -10,7 +10,10 @@
     {
       "name": "agent-runway",
       "description": "Ensures subagents understand project architecture, module boundaries, and conventions before writing code. Validates code placement after execution.",
-      "source": ".",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/rennf93/agent-runway.git"
+      },
       "category": "development"
     }
   ]

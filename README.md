@@ -1,89 +1,94 @@
 # Agent Runway
 
-> **v1.0.0** — 45 tests passing, 13 languages supported, config validation, deep directory scanning, cross-platform paths. See [Known Limitations](#known-limitations) for edge cases.
+A Claude Code plugin that gives subagents architectural awareness before they write code.
 
-A Claude Code plugin that ensures subagents understand your project's architecture, module boundaries, and coding conventions before they write a single line of code.
-
-## Why
+## The Problem
 
 When Claude Code delegates work to subagents, those agents operate in complete isolation. They receive no CLAUDE.md rules, no memory, no understanding of your project structure. A subagent asked to "reduce complexity in the router" will happily extract helpers inline instead of moving them to your `helpers/` module. It will add comments to "explain" its changes. It will slap `# noqa` on a linting error instead of fixing it.
 
-Agent Runway fixes this by intercepting subagent creation and injecting architectural context directly into their prompts. It also validates every file write against your project's module boundaries and coding conventions.
+## The Fix
 
-## How It Works
+Agent Runway intercepts every subagent spawn and injects your project's architectural context directly into its prompt. No configuration needed. The subagent just knows.
 
-The plugin operates at two critical moments, following the runway metaphor:
+Install it, forget about it, and your subagents stop creating tech debt.
 
-### Takeoff (Pre-flight)
+## What Happens
 
-1. **Session start**: Scans your project structure, reads CLAUDE.md, reads `.agent-runway.yml` config, and builds an architectural map
-2. **Agent spawning**: Intercepts every `Agent` tool call via `PreToolUse` hook and injects the architectural map into the subagent's prompt using `updatedInput`
+On **session start**, the plugin scans your project: directory structure, module purposes, CLAUDE.md rules. It caches this as an architectural map.
 
-The subagent now knows: which directories exist, what each is for, what's forbidden where, your CLAUDE.md rules, and your coding conventions.
+When Claude **spawns a subagent**, the plugin intercepts the `Agent` tool call and prepends the map to the subagent's prompt via `updatedInput`. The subagent now knows which directories exist, what each is for, what's forbidden where, and your project's rules.
 
-### Landing (Post-flight)
+This is what a subagent sees before its task:
 
-After a subagent writes or edits a file, two `PostToolUse` validators run in parallel:
+```
+=== AGENT RUNWAY: ARCHITECTURAL CONTEXT ===
 
-- **Placement validator**: Was this code written in the correct module? Helpers in `routers/` get flagged. Business logic in `controllers/` gets flagged.
-- **Convention validator**: Does the code follow project conventions? Comments, suppressions, and custom patterns are checked across 13 languages.
+Project: my-project
 
-Each rule is independently configurable as `warn` (Claude self-corrects) or `block` (edit is rejected).
+Module Boundaries:
+- routers/ -> HTTP route/endpoint definitions. NO: helper functions, business logic
+- services/ -> Business logic and orchestration. NO: route definitions
+- helpers/ -> Shared utility/helper functions
+- tests/ -> Test suite. NO: production code
+
+Mandatory Conventions:
+- NO INLINE COMMENTS [warn]
+- NO LINT SUPPRESSIONS [warn]
+- NO HELPERS IN ROUTERS [warn]
+
+CLAUDE.md Rules (MANDATORY):
+- DO NOT LEAVE ANY COMMENTS IN THE CODE
+- ASK QUESTIONS BEFORE YOU DO ANYTHING
+
+=== END ARCHITECTURAL CONTEXT ===
+
+[original task prompt follows]
+```
+
+No extra tokens in your main conversation. No agent definitions to modify. It just works.
 
 ## Installation
 
-### From GitHub (self-hosted marketplace)
+### From GitHub
 
 ```bash
 /plugin marketplace add rennf93/agent-runway
 /plugin install agent-runway@rennf93
 ```
 
-### From a local directory (development)
+### Local development
 
 ```bash
 claude --plugin-dir /path/to/agent-runway
 ```
 
-## Quick Start
+## Zero Config Required
 
-### Zero-config
+Agent Runway works out of the box. It auto-discovers your project structure by matching directory names against 25+ known patterns (`routers/`, `services/`, `helpers/`, `models/`, `tests/`, `middleware/`, `adapters/`, etc.) and infers purpose for unknown directories by sampling code files. It extracts imperative rules from your CLAUDE.md automatically.
 
-Agent Runway works out of the box with no configuration. It auto-discovers your project structure and applies sensible defaults. All conventions default to `warn` enforcement.
+No `.agent-runway.yml` needed unless you want explicit control.
 
-### With configuration
+## Optional: Post-landing Validation
 
-Create `.agent-runway.yml` in your project root for explicit control:
+Agent Runway also validates code **after** a subagent writes it. All rules are **enabled in warn mode by default** — violations are reported to Claude so it self-corrects on the next turn. The edit is never blocked unless you explicitly opt in.
+
+Two validators run after each Write/Edit:
+
+- **Convention validator**: Flags comments, lint suppressions, and custom patterns across 13 languages
+- **Placement validator**: Flags code written in the wrong module (helpers in routers, business logic in controllers)
+
+### Opting into block mode
+
+Block mode rejects the edit entirely, forcing Claude to fix the issue and retry. Only use this when you're confident in the rule — false positives will cause friction.
 
 ```yaml
-modules:
-  routers/:
-    purpose: "HTTP endpoint definitions only"
-    forbidden:
-      - "helper functions"
-      - "business logic"
-  services/:
-    purpose: "Business logic and orchestration"
-  helpers/:
-    purpose: "Shared utility functions"
-
 conventions:
   no_inline_comments:
     enabled: true
     enforcement: block
-  no_lint_suppressions:
-    enabled: true
-    enforcement: block
-  no_noqa:
-    enabled: true
-    enforcement: block
 ```
 
-See [Configuration Reference](docs/configuration.md) for the full schema.
-
-## Language Support
-
-Convention validation (comments, lint suppressions) works across:
+### Supported Languages
 
 | Language | Comment Style | Suppressions Detected |
 |----------|--------------|----------------------|
@@ -101,45 +106,18 @@ Convention validation (comments, lint suppressions) works across:
 | Shell | `#` | `shellcheck disable` |
 | Ruby | `#` | `rubocop: disable`, `steep:ignore`, `sorbet: ignore` |
 
-## What Gets Injected
+See [Built-in Rules](docs/rules.md) for details on each rule.
 
-When a subagent spawns, its prompt is prepended with:
+## Configuration
 
-```
-=== AGENT RUNWAY: ARCHITECTURAL CONTEXT ===
+Create `.agent-runway.yml` in your project root only if you need to:
 
-Project: my-project
+- Override auto-discovered module purposes or forbidden definitions
+- Set specific rules to `block` enforcement
+- Add custom regex patterns
+- Tune context injection size
 
-Module Boundaries:
-- routers/ -> HTTP route/endpoint definitions. NO: helper functions, business logic
-- services/ -> Business logic and orchestration. NO: route definitions
-- helpers/ -> Shared utility/helper functions
-- tests/ -> Test suite. NO: production code
-
-Mandatory Conventions:
-- NO INLINE COMMENTS [block]
-- NO LINT SUPPRESSIONS [block]
-- NO HELPERS IN ROUTERS [block]
-
-CLAUDE.md Rules (MANDATORY):
-- DO NOT LEAVE ANY COMMENTS IN THE CODE
-- ASK QUESTIONS BEFORE YOU DO ANYTHING
-
-=== END ARCHITECTURAL CONTEXT ===
-
-[original task prompt follows]
-```
-
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Configuration Reference](docs/configuration.md) | Full `.agent-runway.yml` schema with all options |
-| [Architecture](docs/architecture.md) | How the plugin works internally, hook flow, data model |
-| [Built-in Rules](docs/rules.md) | All convention rules and what they catch |
-| [Examples](docs/examples.md) | Ready-to-use configs for Python, TypeScript, Go, and monorepo projects |
-| [Contributing](CONTRIBUTING.md) | How to contribute to the plugin |
-| [Testing](TESTING.md) | How to test the plugin locally |
+See [Configuration Reference](docs/configuration.md) for the full schema and [Examples](docs/examples.md) for ready-to-use configs for FastAPI, Django, Flask, Next.js, Express, Go, and monorepos.
 
 ## Skills
 
@@ -147,19 +125,24 @@ CLAUDE.md Rules (MANDATORY):
 |-------|-------------|
 | `/agent-runway:runway-status` | Display the current architectural map, active conventions, and enforcement levels |
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Configuration Reference](docs/configuration.md) | Full `.agent-runway.yml` schema |
+| [Architecture](docs/architecture.md) | How the plugin works internally |
+| [Built-in Rules](docs/rules.md) | All convention rules and what they catch |
+| [Examples](docs/examples.md) | Per-language and monorepo configs |
+| [Contributing](CONTRIBUTING.md) | How to contribute |
+| [Testing](TESTING.md) | How to test locally |
+
 ## Known Limitations
 
-### Comment detection is regex-based, not AST-based
+**Comment detection is regex-based.** String literals are stripped before checking (preventing most false positives), but edge cases with complex interpolation may slip through.
 
-String literals are stripped before checking (preventing most false positives like `"#FF0000"` or `"https://example.com#section"`), but edge cases with complex string interpolation or multiline strings may slip through.
+**Placement heuristics use function names.** Route decorators are detected and excluded, but undecorated functions with ambiguous names may be misclassified.
 
-### Placement heuristics rely on function names
-
-The placement validator classifies functions as "helpers" based on name prefixes (`format_*`, `parse_*`, `helper_*`, etc.). Route decorators are detected and excluded, but undecorated functions with ambiguous names may be misclassified. Use `.agent-runway.yml` to fine-tune module boundaries if needed.
-
-### No Windows CI
-
-Path handling uses `os.tmpdir()` and `path.join` (cross-platform), but no CI testing on Windows has been done yet. Community reports welcome.
+**No Windows CI.** Path handling is cross-platform (`os.tmpdir()`, `path.join`), but untested in CI.
 
 ## Requirements
 

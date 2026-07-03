@@ -15,6 +15,15 @@
         "url": "https://github.com/rennf93/agent-runway.git"
       },
       "category": "development"
+    },
+    {
+      "name": "fable-mode",
+      "description": "Make Claude Opus 4.8 behave like Claude Fable 5 — doctrine output style, drift-catching hooks (stop-gate, tool discipline, honesty nudges), and an eval loop against golden Fable transcripts.",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/rennf93/opus-fable-playbook.git"
+      },
+      "category": "development"
     }
   ]
 }

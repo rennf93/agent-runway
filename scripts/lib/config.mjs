@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
-import yaml from "js-yaml";
+import { load as loadYaml } from "js-yaml";
 
 const DEFAULT_CONVENTIONS = {
   no_inline_comments: { enabled: true, enforcement: "warn" },
@@ -58,7 +58,7 @@ export function loadConfig(workingDirectory) {
   if (existsSync(configPath)) {
     try {
       const raw = readFileSync(configPath, "utf8");
-      userConfig = yaml.load(raw) || {};
+      userConfig = loadYaml(raw) || {};
     } catch {
       userConfig = {};
     }
@@ -98,7 +98,7 @@ export function validateConfig(workingDirectory) {
   let userConfig;
   try {
     const raw = readFileSync(configPath, "utf8");
-    userConfig = yaml.load(raw) || {};
+    userConfig = loadYaml(raw) || {};
   } catch {
     warnings.push("Failed to parse .agent-runway.yml");
     return warnings;
